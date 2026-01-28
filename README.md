@@ -107,6 +107,7 @@ This repository documents my solutions and technical analysis for the **OverTheW
 * **Why:** The `-quiet` flag prevents the interactive behavior and lets me send data uninhibited.
 
 **Resulting RSA Key:**
+```text
 -----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAvmOkuifmMg6HL2YPIOjon6iWfbp7c3jx34YkYWqUH57SUdyJ
 imZ.zeyGC0gtZPGujUSxiJSWI/oTqexh+cAMTSMIOJf7+BrJObArnxd9Y7YT2bRPQ
@@ -114,7 +115,8 @@ Ja6Lzb558YW3FZ187ORIO+rW4LCDCNd2lUvLE/GL2GWyuKN0K5iCd5TbtJzEkQTu
 ... (Key abbreviated for readability, full key stored locally) ...
 dxviW8+TFVEBI1O4f7HVm6EpTscdDxU+bCXWkfjuRb7Dy9GOtt9JPsX8MBTakzh3
 vBgsyi/sN3RqRBcGU40fOoZyfAMT8s1m/uYv52O6IgeuZ/ujbjY=
------END RSA PRIVATE KEY-----  
+-----END RSA PRIVATE KEY-----
+```
 
 * **Level 17 → 18:**
     * **Objective:** Find the difference between two files.
