@@ -97,10 +97,25 @@ This repository documents my solutions and technical analysis for the **OverTheW
 
 ### Levels 16 → 20: Port Scanning & SSH Tricks
 
-* **Level 16 → 17:**
-    * **Objective:** Scan ports for an SSL server, then avoid shell interpretation.
-    * **Command:** `openssl s_client -connect localhost:31518 -quiet`
-    * **Why:** The `-quiet` flag prevents the interactive shell from interpreting the password characters as commands (like 'R' for renegotiate).
+### Level 16 → 17: The OpenSSL "Quiet" Trick
+* **Objective:** Scan ports for an SSL server and retrieve the credentials.
+* **Analysis:**
+  * I found the server on port 31518 using `nmap`.
+  * However, `openssl s_client` defaults to **interactive mode**. This means every key pressed is interpreted as a command rather than data.
+  * According to the manpage, `R` renegotiates the session and `Q` ends it. Since the password might contain these characters, sending it raw causes the connection to hang or close.
+* **Command:** `openssl s_client -connect localhost:31518 -quiet`
+* **Why:** The `-quiet` flag prevents the interactive behavior and lets me send data uninhibited.
+
+**Resulting RSA Key:**
+```text
+-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAvmOkuifmMg6HL2YPIOjon6iWfbp7c3jx34YkYWqUH57SUdyJ
+imZ.zeyGC0gtZPGujUSxiJSWI/oTqexh+cAMTSMIOJf7+BrJObArnxd9Y7YT2bRPQ
+Ja6Lzb558YW3FZ187ORIO+rW4LCDCNd2lUvLE/GL2GWyuKN0K5iCd5TbtJzEkQTu
+... (Key abbreviated for readability, full key stored locally) ...
+dxviW8+TFVEBI1O4f7HVm6EpTscdDxU+bCXWkfjuRb7Dy9GOtt9JPsX8MBTakzh3
+vBgsyi/sN3RqRBcGU40fOoZyfAMT8s1m/uYv52O6IgeuZ/ujbjY=
+-----END RSA PRIVATE KEY-----
 
 * **Level 17 → 18:**
     * **Objective:** Find the difference between two files.
