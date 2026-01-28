@@ -1,19 +1,113 @@
-# wargame-writeups
+# Wargame Writeups: OverTheWire Bandit
 
+**Focus:** Linux SysAdmin, Bash Scripting, SSL/TLS, Networking
+**Tools Used:** Bash, OpenSSL, Nmap, Netcat, SSH, Gzip/Tar
 
 ## Overview
-This repository documents my solutions and technical analysis for various cybersecurity wargames, starting with **OverTheWire: Bandit**. 
+This repository documents my solutions and technical analysis for the **OverTheWire: Bandit** wargame. My goal is not just to capture the flag, but to document the **underlying systems engineering concepts** (file permissions, SSL handshakes, SUID binaries) required to solve each level.
 
-My goal is not just to capture the flag, but to document the **underlying systems engineering concepts** (file permissions, SSL handshakes, SUID binaries) required to solve each level.
+---
 
-## Active Projects
-| Wargame | Status | Focus Areas |
-|:--- |:--- |:--- |
-| **Bandit** | Levels 1-19 | Linux SysAdmin, Bash Scripting, SSL/TLS, Networking |
+## Level Walkthroughs (0 → 20)
 
-## Featured Write-up
-TBD
+### Levels 0 → 5: Navigation & File Handling
 
-## Tools Used
-* **Languages:** Bash, Python
-* **Utilities:** OpenSSL, Nmap, Netcat, SSH, Gzip/Tar
+* **Level 0 → 1:**
+    * **Objective:** Access the server and read a file named `readme`.
+    * **Command:** `ls -al` then `cat readme`
+    * **Why:** Used `ls -al` to list all files (including hidden ones) to verify the directory contents.
+
+* **Level 1 → 2:**
+    * **Objective:** Read a file named `-` (dash).
+    * **Command:** `cat ./-`
+    * **Why:** The dash is usually interpreted as "standard input." Specifying the path `./-` forces the shell to treat it as a file.
+
+* **Level 2 → 3:**
+    * **Objective:** Read a file with spaces in the name.
+    * **Command:** `cat ./"spaces in this filename"`
+    * **Why:** Quotes ensure the shell treats the entire string as a single filename rather than separate arguments.
+
+* **Level 3 → 4:**
+    * **Objective:** Access a hidden file inside the `inhere` directory.
+    * **Command:** `ls -al` then `cat .Hiding-From-You`
+    * **Why:** Standard `ls` does not show files starting with a dot. Added `-al` to reveal hidden files.
+
+* **Level 4 → 5:**
+    * **Objective:** Find the only human-readable file in the `inhere` directory.
+    * **Command:** `file ./*` then `cat ./-file07`
+    * **Why:** Used the `file` command to determine data types, isolating the ASCII text file among binary data.
+
+* **Level 5 → 6:**
+    * **Objective:** Find a file: 1033 bytes, human-readable, not executable.
+    * **Command:** `find . -size 1033c`
+    * **Why:** Used `find` with the `-size` flag to filter by byte count, instantly locating the correct file in nested directories.
+
+### Levels 6 → 10: Find, Grep, and Permissions
+
+* **Level 6 → 7:**
+    * **Objective:** Find a file owned by user `bandit7`, group `bandit6`, sized 33 bytes.
+    * **Command:** `find / -size 33c -user bandit7 -group bandit6 2>/dev/null`
+    * **Why:** Redirected "Permission Denied" errors to `/dev/null` to clean the output and find the hidden password file.
+
+* **Level 7 → 8:**
+    * **Objective:** Find the password stored next to the word "millionth".
+    * **Command:** `grep "millionth" data.txt`
+    * **Why:** Used `grep` to filter a large dataset for a specific string pattern.
+
+* **Level 8 → 9:**
+    * **Objective:** Find the only line of text that occurs exactly once.
+    * **Command:** `sort data.txt | uniq -u`
+    * **Why:** `uniq` requires sorted input to detect duplicates. Piped `sort` into `uniq -u` to isolate the unique line.
+
+* **Level 9 → 10:**
+    * **Objective:** Find a human-readable string in a binary file.
+    * **Command:** `strings data.txt | grep "===="`
+    * **Why:** Used `strings` (or `tr`) to strip non-printable characters from the binary file.
+
+* **Level 10 → 11:**
+    * **Objective:** Decode a Base64 encoded file.
+    * **Command:** `base64 --decode data.txt`
+    * **Why:** Recognized standard Base64 encoding and used the native decode tool.
+
+### Levels 11 → 15: Encoding & Networking
+
+* **Level 11 → 12:**
+    * **Objective:** Decode a ROT13 shifted string.
+    * **Command:** `cat data.txt | tr 'a-zA-Z' 'n-za-mN-ZA-M'`
+    * **Why:** ROT13 rotates characters by 13 places. Used `tr` to manually map the alphabet shift.
+
+* **Level 12 → 13:**
+    * **Objective:** Extract a file repeatedly compressed (hexdump, tar, gzip, bzip2).
+    * **Methodology:** Used `xxd -r` to reverse the hexdump, then `file` to identify compression types (gzip/bzip2), repeatedly decompressing until the text was revealed.
+
+* **Level 13 → 14:**
+    * **Objective:** Use a provided SSH private key to log in.
+    * **Command:** `ssh -i sshkey.private bandit14@localhost`
+    * **Why:** Used the `-i` flag to authenticate via key file instead of password.
+
+* **Level 14 → 15:**
+    * **Objective:** Submit the current password to port 30000 on localhost.
+    * **Command:** `telnet localhost 30000`
+    * **Why:** Connected directly to the local network daemon to retrieve the next flag.
+
+* **Level 15 → 16:**
+    * **Objective:** Submit password to an SSL-encrypted service.
+    * **Command:** `openssl s_client -connect localhost:30001`
+    * **Why:** Telnet does not support SSL. Used `openssl` to handle the secure handshake.
+
+### Levels 16 → 20: Port Scanning & SSH Tricks
+
+* **Level 16 → 17:**
+    * **Objective:** Scan ports for an SSL server, then avoid shell interpretation.
+    * **Command:** `openssl s_client -connect localhost:31518 -quiet`
+    * **Why:** The `-quiet` flag prevents the interactive shell from interpreting the password characters as commands (like 'R' for renegotiate).
+
+* **Level 17 → 18:**
+    * **Objective:** Find the difference between two files.
+    * **Command:** `diff passwords.old passwords.new`
+    * **Why:** Used `diff` to instantly highlight the changed line containing the new password.
+
+* **Level 18 → 19:**
+    * **Objective:** Execute a command on a server that forces logout.
+    * **Command:** `ssh bandit18@... "cat readme"`
+    * **Why:** Appended the command to the SSH request to execute it *before* the remote shell's `.bashrc` could force a logout.
