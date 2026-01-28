@@ -79,6 +79,7 @@ This repository documents my solutions and technical analysis for the **OverTheW
 * **Level 12 → 13:**
     * **Objective:** Extract a file repeatedly compressed (hexdump, tar, gzip, bzip2).
     * **Methodology:** Used `xxd -r` to reverse the hexdump, then `file` to identify compression types (gzip/bzip2), repeatedly decompressing until the text was revealed.
+    * **Key Learning:** This was my favorite level. I was previously unaware that every file has an internal **signature (magic number)**. I really enjoyed the investigative process of analyzing the raw hex data to identify the file type, rather than just relying on extensions.
 
 * **Level 13 → 14:**
     * **Objective:** Use a provided SSH private key to log in.
